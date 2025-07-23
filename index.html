@@ -19,32 +19,35 @@
       top: 0;
       left: 0;
       width: 100%;
-      background-color: rgba(0, 0, 0, 0.7);
+      background-color: rgba(0, 0, 0, 0.85);
       color: #fff;
-      padding: 8px 12px;
+      padding: 6px 12px;
       font-size: 13px;
       line-height: 1.4em;
       z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 2px;
     }
     #branding h1 {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: normal;
-      margin: 2px 0;
     }
     #tour {
       position: absolute;
-      top: 100px; /* allow space for branding */
+      top: 90px; /* updated for compact branding */
       bottom: 0;
       left: 0;
       right: 0;
     }
     @media screen and (max-width: 600px) {
       #branding {
-        font-size: 12px;
-        padding: 6px 10px;
+        font-size: 11px;
+        padding: 6px 8px;
       }
       #branding h1 {
-        font-size: 12px;
+        font-size: 11px;
       }
       #tour {
         top: 110px;
@@ -54,11 +57,9 @@
 </head>
 <body>
   <div id="branding">
-    <h1>🏠 Gharana Stays</h1>
+    <h1>🏠 Gharana Stays — 3D Tour</h1>
     <h1>"Ghar Jaise Comfort, Hostel Jaise Energy"</h1>
-    <h1>📍 3D Tour of Our Property</h1>
-    <h1>Explore our beautiful rooms and facilities</h1>
-    <h1>📞 Contact Us: +91 7548910219 | +91 6290873280 | +91 90736 48368 | +91 7003053900</h1>
+    <h1>📞 +91 7548910219 | +91 6290873280 | +91 90736 48368 | +91 7003053900</h1>
   </div>
   <div id="tour"></div>
 
@@ -125,57 +126,44 @@
       "Hallway2": [0.3245, -0.0226]
     };
 
-    let isLoaded = {};
-    function loadScene(name) {
-      if (!isLoaded[name]) {
-        viewer.add(scenes[name]);
-        isLoaded[name] = true;
-      }
-      viewer.setPanorama(scenes[name]);
+    for (const [name, pano] of Object.entries(scenes)) {
+      setInitialView(pano, ...initialViews[name]);
+      viewer.add(pano);
     }
 
-    Object.entries(scenes).forEach(([name, pano]) => {
-      setInitialView(pano, ...initialViews[name]);
-    });
+    function link(from, to, yaw) {
+      scenes[from].link(scenes[to], toVector3(yaw));
+    }
 
-    // Hotspot links using functions
-    scenes["Hallway1"].link(scenes["Hallway2"], toVector3(-0.213), () => loadScene("Hallway2"));
-    scenes["Hallway1"].link(scenes["Bath1"], toVector3(-2.795), () => loadScene("Bath1"));
-    scenes["Hallway1"].link(scenes["RoomBath"], toVector3(-3.096), () => loadScene("RoomBath"));
+    link("Hallway1", "Hallway2", -0.213);
+    link("Hallway1", "Bath1", -2.795);
+    link("Hallway1", "RoomBath", -3.096);
+    link("RoomBath", "RoomBathDeep", 0.971);
+    link("RoomBath", "Hallway1", -2.232);
+    link("RoomBathDeep", "RoomBath", -1.9);
+    link("Bath1", "Hallway1", 3.04);
+    link("Bath2", "Hallway2", 0.002);
+    link("Hallway2", "Bath2", -2.111);
+    link("Hallway2", "RoomBMID", 1.23);
+    link("Hallway2", "Hallway3", -0.045);
+    link("Hallway2", "Kitchen", -0.589);
+    link("Hallway2", "Hallway1", 3.015);
+    link("RoomBMID", "Hallway2", -1.029);
+    link("RoomBMID", "BalconyMain", 1.673);
+    link("BalconyMain", "RoomBMID", -2.08);
+    link("Kitchen", "Hallway2", -2.498);
+    link("Hallway3", "Kitchen", 0.556);
+    link("Hallway3", "Hallway2", -0.064);
+    link("Hallway3", "RoomB3", -1.68);
+    link("Hallway3", "Room2", 2.931);
+    link("Room2", "Hallway3", -2.212);
+    link("RoomB3", "Hallway3", -2.162);
+    link("RoomB3", "Balcony", 2.108);
+    link("Balcony", "RoomB3", -2.587);
+    link("Balcony", "BalconyDeep", 0.052);
+    link("BalconyDeep", "Balcony", -1.379);
 
-    scenes["RoomBath"].link(scenes["RoomBathDeep"], toVector3(0.971), () => loadScene("RoomBathDeep"));
-    scenes["RoomBath"].link(scenes["Hallway1"], toVector3(-2.232), () => loadScene("Hallway1"));
-    scenes["RoomBathDeep"].link(scenes["RoomBath"], toVector3(-1.9), () => loadScene("RoomBath"));
-
-    scenes["Bath1"].link(scenes["Hallway1"], toVector3(3.04), () => loadScene("Hallway1"));
-    scenes["Bath2"].link(scenes["Hallway2"], toVector3(0.002), () => loadScene("Hallway2"));
-
-    scenes["Hallway2"].link(scenes["Bath2"], toVector3(-2.111), () => loadScene("Bath2"));
-    scenes["Hallway2"].link(scenes["RoomBMID"], toVector3(1.23), () => loadScene("RoomBMID"));
-    scenes["Hallway2"].link(scenes["Hallway3"], toVector3(-0.045), () => loadScene("Hallway3"));
-    scenes["Hallway2"].link(scenes["Kitchen"], toVector3(-0.589), () => loadScene("Kitchen"));
-    scenes["Hallway2"].link(scenes["Hallway1"], toVector3(3.015), () => loadScene("Hallway1"));
-
-    scenes["RoomBMID"].link(scenes["Hallway2"], toVector3(-1.029), () => loadScene("Hallway2"));
-    scenes["RoomBMID"].link(scenes["BalconyMain"], toVector3(1.673), () => loadScene("BalconyMain"));
-    scenes["BalconyMain"].link(scenes["RoomBMID"], toVector3(-2.08), () => loadScene("RoomBMID"));
-
-    scenes["Kitchen"].link(scenes["Hallway2"], toVector3(-2.498), () => loadScene("Hallway2"));
-
-    scenes["Hallway3"].link(scenes["Kitchen"], toVector3(0.556), () => loadScene("Kitchen"));
-    scenes["Hallway3"].link(scenes["Hallway2"], toVector3(-0.064), () => loadScene("Hallway2"));
-    scenes["Hallway3"].link(scenes["RoomB3"], toVector3(-1.68), () => loadScene("RoomB3"));
-    scenes["Hallway3"].link(scenes["Room2"], toVector3(2.931), () => loadScene("Room2"));
-
-    scenes["Room2"].link(scenes["Hallway3"], toVector3(-2.212), () => loadScene("Hallway3"));
-    scenes["RoomB3"].link(scenes["Hallway3"], toVector3(-2.162), () => loadScene("Hallway3"));
-    scenes["RoomB3"].link(scenes["Balcony"], toVector3(2.108), () => loadScene("Balcony"));
-
-    scenes["Balcony"].link(scenes["RoomB3"], toVector3(-2.587), () => loadScene("RoomB3"));
-    scenes["Balcony"].link(scenes["BalconyDeep"], toVector3(0.052), () => loadScene("BalconyDeep"));
-    scenes["BalconyDeep"].link(scenes["Balcony"], toVector3(-1.379), () => loadScene("Balcony"));
-
-    loadScene("Hallway1");
+    viewer.setPanorama(scenes["Hallway1"]);
   </script>
 </body>
 </html>
