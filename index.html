@@ -2,22 +2,62 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gharana Stays 3D Tour</title>
   <!-- Compatible Three.js version -->
   <script src="https://cdn.jsdelivr.net/npm/three@0.105.2/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/panolens@0.12.0/build/panolens.min.js"></script>
   <style>
-    body { margin: 0; }
-    #tour { width: 100vw; height: 100vh; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+    #branding {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background-color: #2c3e50;
+      color: white;
+      padding: 10px 20px;
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    #branding h1 {
+      font-size: 16px;
+      margin: 0;
+    }
+    #tour {
+      position: absolute;
+      top: 50px; /* height of branding bar */
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+    @media screen and (max-width: 600px) {
+      #branding h1 {
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div id="branding">
+    <h1>🏠 Gharana Stays</h1>
+    <h1>"Ghar Jaise Comfort, Hostel Jaise Energy"</h1>
+    <h1>📍 3D Tour of Our Property</h1>
+    <h1>Explore our beautiful rooms and facilities</h1>
+    <h1>📞 Contact Us: +91 7548910219 | +91 6290873280 | +91 90736 48368 | +91 7003053900</h1>
+  </div>
   <div id="tour"></div>
 
   <script>
     const viewer = new PANOLENS.Viewer({ container: document.getElementById('tour') });
 
-    // Yaw/Pitch-based initial view function
     function setInitialView(panorama, yaw, pitch) {
       panorama.addEventListener('enter-fade-start', () => {
         const x = 5000 * Math.sin(yaw + Math.PI / 2);
@@ -27,7 +67,6 @@
       });
     }
 
-    // Hotspot converter with 90 degree shift
     const toVector3 = yaw => {
       const d = 5000;
       const correctedYaw = yaw + Math.PI / 2;
@@ -38,7 +77,6 @@
       );
     };
 
-    // Panoramas and initial views
     const scenes = {
       "Hallway1": new PANOLENS.ImagePanorama("Hallway1.jpg"),
       "BalconyDeep": new PANOLENS.ImagePanorama("RoomB3BalconyDeep.jpg"),
@@ -78,7 +116,6 @@
       viewer.add(pano);
     });
 
-    // Link hotspots with corrected yaw
     scenes["Hallway1"].link(scenes["Hallway2"], toVector3(-0.213));
     scenes["Hallway1"].link(scenes["Bath1"], toVector3(-2.795));
     scenes["Hallway1"].link(scenes["RoomBath"], toVector3(-3.096));
@@ -115,7 +152,9 @@
     scenes["Balcony"].link(scenes["BalconyDeep"], toVector3(0.052));
     scenes["BalconyDeep"].link(scenes["Balcony"], toVector3(-1.379));
 
-    viewer.setPanorama(scenes["Hallway1"]);
+    document.addEventListener('DOMContentLoaded', () => {
+      viewer.setPanorama(scenes["Hallway1"]);
+    });
   </script>
 </body>
 </html>
