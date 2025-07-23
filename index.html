@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gharana Stays 3D Tour</title>
+  <!-- Compatible Three.js version -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.105.2/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/panolens@0.12.0/build/panolens.min.js"></script>
+  <style>
+    body { margin: 0; }
+    #tour { width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="tour"></div>
+
+  <script>
+    const viewer = new PANOLENS.Viewer({ container: document.getElementById('tour') });
+
+    // Yaw/Pitch-based initial view function
+    function setInitialView(panorama, yaw, pitch) {
+      panorama.addEventListener('enter-fade-start', () => {
+        const x = 5000 * Math.sin(yaw + Math.PI / 2);
+        const y = 5000 * pitch;
+        const z = 5000 * Math.cos(yaw + Math.PI / 2);
+        viewer.tweenControlCenter(new THREE.Vector3(x, y, z), 0);
+      });
+    }
+
+    // Hotspot converter with 90 degree shift
+    const toVector3 = yaw => {
+      const d = 5000;
+      const correctedYaw = yaw + Math.PI / 2;
+      return new THREE.Vector3(
+        d * Math.sin(correctedYaw),
+        0,
+        d * Math.cos(correctedYaw)
+      );
+    };
+
+    // Panoramas and initial views
+    const scenes = {
+      "Hallway1": new PANOLENS.ImagePanorama("Hallway1.jpg"),
+      "BalconyDeep": new PANOLENS.ImagePanorama("RoomB3BalconyDeep.jpg"),
+      "Balcony": new PANOLENS.ImagePanorama("RoomB3Balcony.jpg"),
+      "RoomBathDeep": new PANOLENS.ImagePanorama("Room1Deep.jpg"),
+      "Bath1": new PANOLENS.ImagePanorama("Bath1.jpg"),
+      "Bath2": new PANOLENS.ImagePanorama("Bath2.jpg"),
+      "BalconyMain": new PANOLENS.ImagePanorama("RoomB2Balcony.jpg"),
+      "RoomBMID": new PANOLENS.ImagePanorama("RoomB2Main.jpg"),
+      "Hallway3": new PANOLENS.ImagePanorama("Hallway3.jpg"),
+      "RoomB3": new PANOLENS.ImagePanorama("RoomB3Main.jpg"),
+      "Room2": new PANOLENS.ImagePanorama("Room2.jpg"),
+      "RoomBath": new PANOLENS.ImagePanorama("Room1Main.jpg"),
+      "Kitchen": new PANOLENS.ImagePanorama("Kitchen.jpg"),
+      "Hallway2": new PANOLENS.ImagePanorama("Hallway2.jpg")
+    };
+
+    const initialViews = {
+      "Hallway1": [-1.0157, 0.2108],
+      "BalconyDeep": [-0.5022, 0.1103],
+      "Balcony": [0.8966, 0.1113],
+      "RoomBathDeep": [-2.6121, 0.0388],
+      "Bath1": [0, 0],
+      "Bath2": [3.1083, 0.1468],
+      "BalconyMain": [1.4547, 0.1365],
+      "RoomBMID": [2.2674, 0.0375],
+      "Hallway3": [-0.4971, 0.0818],
+      "RoomB3": [1.3617, 0.1641],
+      "Room2": [1.5484, 0.1964],
+      "RoomBath": [0.6951, 0.1607],
+      "Kitchen": [0.9080, 0.0932],
+      "Hallway2": [0.3245, -0.0226]
+    };
+
+    Object.entries(scenes).forEach(([name, pano]) => {
+      setInitialView(pano, ...initialViews[name]);
+      viewer.add(pano);
+    });
+
+    // Link hotspots with corrected yaw
+    scenes["Hallway1"].link(scenes["Hallway2"], toVector3(-0.213));
+    scenes["Hallway1"].link(scenes["Bath1"], toVector3(-2.795));
+    scenes["Hallway1"].link(scenes["RoomBath"], toVector3(-3.096));
+
+    scenes["RoomBath"].link(scenes["RoomBathDeep"], toVector3(0.971));
+    scenes["RoomBath"].link(scenes["Hallway1"], toVector3(-2.232));
+    scenes["RoomBathDeep"].link(scenes["RoomBath"], toVector3(-1.9));
+
+    scenes["Bath1"].link(scenes["Hallway1"], toVector3(3.04));
+    scenes["Bath2"].link(scenes["Hallway2"], toVector3(0.002));
+
+    scenes["Hallway2"].link(scenes["Bath2"], toVector3(-2.111));
+    scenes["Hallway2"].link(scenes["RoomBMID"], toVector3(1.23));
+    scenes["Hallway2"].link(scenes["Hallway3"], toVector3(-0.045));
+    scenes["Hallway2"].link(scenes["Kitchen"], toVector3(-0.589));
+    scenes["Hallway2"].link(scenes["Hallway1"], toVector3(3.015));
+
+    scenes["RoomBMID"].link(scenes["Hallway2"], toVector3(-1.029));
+    scenes["RoomBMID"].link(scenes["BalconyMain"], toVector3(1.673));
+    scenes["BalconyMain"].link(scenes["RoomBMID"], toVector3(-2.08));
+
+    scenes["Kitchen"].link(scenes["Hallway2"], toVector3(-2.498));
+
+    scenes["Hallway3"].link(scenes["Kitchen"], toVector3(0.556));
+    scenes["Hallway3"].link(scenes["Hallway2"], toVector3(-0.064));
+    scenes["Hallway3"].link(scenes["RoomB3"], toVector3(-1.68));
+    scenes["Hallway3"].link(scenes["Room2"], toVector3(2.931));
+
+    scenes["Room2"].link(scenes["Hallway3"], toVector3(-2.212));
+    scenes["RoomB3"].link(scenes["Hallway3"], toVector3(-2.162));
+    scenes["RoomB3"].link(scenes["Balcony"], toVector3(2.108));
+
+    scenes["Balcony"].link(scenes["RoomB3"], toVector3(-2.587));
+    scenes["Balcony"].link(scenes["BalconyDeep"], toVector3(0.052));
+    scenes["BalconyDeep"].link(scenes["Balcony"], toVector3(-1.379));
+
+    viewer.setPanorama(scenes["Hallway1"]);
+  </script>
+</body>
+</html>
